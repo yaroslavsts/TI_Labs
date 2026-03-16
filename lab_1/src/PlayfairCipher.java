@@ -1,6 +1,6 @@
 import java.util.*;
 
-// Шифр Плейфера с 4 шифрующими таблицами (английский язык), последовательное шифрование текста четырьмя матрицами
+// Шифр Плейфера с 4 шифрующими таблицами (английский язык), перекрёстное шифрование
 public class PlayfairCipher {
     private static final String ALPHABET = "ABCDEFGHIKLMNOPQRSTUVWXYZ";
 
@@ -35,27 +35,15 @@ public class PlayfairCipher {
         return matrix;
     }
 
-    // Создание биграмм с вставкой X между одинаковыми буквами и X между XX
+    // Создание биграмм: разбиение на пары по 2 символа, дополнение X при нечётной длине
     public List<String> createBigrams(String text) {
         text = prepareText(text);
-        List<Character> result = new ArrayList<>();
-        char[] chars = text.toCharArray();
-
-        for (int i = 0; i < chars.length; i++) {
-            result.add(chars[i]);
-            if (i + 1 < chars.length) {
-                if (chars[i] == chars[i + 1]) {
-                    result.add(chars[i] == 'X' ? 'Z' : 'X');
-                }
-            }
+        if (text.length() % 2 != 0) {
+            text += 'X';
         }
-        if (result.size() % 2 == 1) {
-            result.add('X');
-        }
-
         List<String> pairs = new ArrayList<>();
-        for (int i = 0; i < result.size(); i += 2) {
-            pairs.add("" + result.get(i) + result.get(i + 1));
+        for (int i = 0; i < text.length(); i += 2) {
+            pairs.add("" + text.charAt(i) + text.charAt(i + 1));
         }
         return pairs;
     }
@@ -69,37 +57,17 @@ public class PlayfairCipher {
         return null;
     }
 
-    // Шифрование одной биграммы одной матрицей
-    private String encryptPair(char[][] matrix, String pair) {
-        int[] pos1 = findPosition(matrix, pair.charAt(0));
-        int[] pos2 = findPosition(matrix, pair.charAt(1));
+    // Перекрёстное шифрование биграммы через 4 матрицы
+    // Первая буква ищется в mFind1, вторая в mFind2
+    // Результат: mOut1[row1][col2] + mOut2[row2][col1]
+    private String crossPair(char[][] mFind1, char[][] mFind2, char[][] mOut1, char[][] mOut2, String pair) {
+        int[] pos1 = findPosition(mFind1, pair.charAt(0));
+        int[] pos2 = findPosition(mFind2, pair.charAt(1));
         if (pos1 == null || pos2 == null) return pair;
-
-        if (pos1[0] == pos2[0]) {
-            return "" + matrix[pos1[0]][(pos1[1] + 1) % 5] + matrix[pos2[0]][(pos2[1] + 1) % 5];
-        } else if (pos1[1] == pos2[1]) {
-            return "" + matrix[(pos1[0] + 1) % 5][pos1[1]] + matrix[(pos2[0] + 1) % 5][pos2[1]];
-        } else {
-            return "" + matrix[pos1[0]][pos2[1]] + matrix[pos2[0]][pos1[1]];
-        }
+        return "" + mOut1[pos1[0]][pos2[1]] + mOut2[pos2[0]][pos1[1]];
     }
 
-    // Дешифрование одной биграммы одной матрицей
-    private String decryptPair(char[][] matrix, String pair) {
-        int[] pos1 = findPosition(matrix, pair.charAt(0));
-        int[] pos2 = findPosition(matrix, pair.charAt(1));
-        if (pos1 == null || pos2 == null) return pair;
-
-        if (pos1[0] == pos2[0]) {
-            return "" + matrix[pos1[0]][(pos1[1] + 4) % 5] + matrix[pos2[0]][(pos2[1] + 4) % 5];
-        } else if (pos1[1] == pos2[1]) {
-            return "" + matrix[(pos1[0] + 4) % 5][pos1[1]] + matrix[(pos2[0] + 4) % 5][pos2[1]];
-        } else {
-            return "" + matrix[pos1[0]][pos2[1]] + matrix[pos2[0]][pos1[1]];
-        }
-    }
-
-    // Шифрование: текст -> матрица1 -> матрица2 -> матрица3 -> матрица4
+    // Шифрование: поиск в матрицах 1 и 4, вывод из матриц 2 и 3
     public String encrypt(String text, String key1, String key2, String key3, String key4) {
         if (key1 == null || key2 == null || key3 == null || key4 == null ||
                 key1.isEmpty() || key2.isEmpty() || key3.isEmpty() || key4.isEmpty()) {
@@ -113,16 +81,12 @@ public class PlayfairCipher {
 
         StringBuilder result = new StringBuilder();
         for (String pair : bigrams) {
-            String s = encryptPair(m1, pair);
-            s = encryptPair(m2, s);
-            s = encryptPair(m3, s);
-            s = encryptPair(m4, s);
-            result.append(s);
+            result.append(crossPair(m1, m4, m2, m3, pair));
         }
         return result.toString();
     }
 
-    // Дешифрование: матрицы в обратном порядке
+    // Дешифрование: поиск в матрицах 2 и 3, вывод из матриц 1 и 4
     public String decrypt(String text, String key1, String key2, String key3, String key4) {
         if (key1 == null || key2 == null || key3 == null || key4 == null ||
                 key1.isEmpty() || key2.isEmpty() || key3.isEmpty() || key4.isEmpty()) {
@@ -140,11 +104,7 @@ public class PlayfairCipher {
         StringBuilder result = new StringBuilder();
         for (int i = 0; i < text.length(); i += 2) {
             String pair = text.substring(i, i + 2);
-            String s = decryptPair(m4, pair);
-            s = decryptPair(m3, s);
-            s = decryptPair(m2, s);
-            s = decryptPair(m1, s);
-            result.append(s);
+            result.append(crossPair(m2, m3, m1, m4, pair));
         }
         return result.toString();
     }
