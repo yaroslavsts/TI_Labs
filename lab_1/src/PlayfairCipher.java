@@ -35,47 +35,18 @@ public class PlayfairCipher {
         return matrix;
     }
 
-// Создание биграмм: разбиение на пары по 2 символа,
-// между одинаковыми буквами вставляется X, между XX вставляется Z
-public List<String> createBigrams(String text) {
-    text = prepareText(text);
-    
-    StringBuilder formatted = new StringBuilder();
-    
-    for (int i = 0; i < text.length(); i++) {
-        char current = text.charAt(i);
-        formatted.append(current);
-        
-        // Проверяем, есть ли следующая буква и совпадает ли она с текущей
-        if (i + 1 < text.length()) {
-            char next = text.charAt(i + 1);
-            if (current == next) {
-                // Специальное правило для XX
-                if (current == 'X') {
-                    formatted.append('Z');
-                } else {
-                    formatted.append('X');
-                }
-                // Важно: i не увеличиваем дополнительно — следующая буква будет обработана в следующей итерации
-            }
-            // если буквы разные — ничего не вставляем
+    // Создание биграмм: разбиение на пары по 2 символа, дополнение X при нечётной длине
+    public List<String> createBigrams(String text) {
+        text = prepareText(text);
+        if (text.length() % 2 != 0) {
+            text += 'X';
         }
+        List<String> pairs = new ArrayList<>();
+        for (int i = 0; i < text.length(); i += 2) {
+            pairs.add("" + text.charAt(i) + text.charAt(i + 1));
+        }
+        return pairs;
     }
-    
-    // Если после всех вставок длина нечётная — добавляем X в конец
-    if (formatted.length() % 2 == 1) {
-        formatted.append('X');
-    }
-    
-    // Разбиваем на пары
-    List<String> pairs = new ArrayList<>();
-    String finalText = formatted.toString();
-    for (int i = 0; i < finalText.length(); i += 2) {
-        pairs.add(finalText.substring(i, i + 2));
-    }
-    
-    return pairs;
-}
 
     private int[] findPosition(char[][] matrix, char c) {
         for (int i = 0; i < 5; i++) {
