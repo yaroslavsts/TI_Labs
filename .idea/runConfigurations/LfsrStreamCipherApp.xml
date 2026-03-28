@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="LfsrStreamCipherApp" type="Application" factoryName="Application">
+    <option name="MAIN_CLASS_NAME" value="LfsrStreamCipherApp" />
+    <module name="TI_Labs" />
+    <method v="2">
+      <option name="Make" enabled="true" />
+    </method>
+  </configuration>
+</component>

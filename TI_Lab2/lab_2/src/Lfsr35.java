@@ -45,22 +45,6 @@ public final class Lfsr35 {
         return b;
     }
 
-    /** Состояние до очередного такта, строка b₁…b₃₅ (MSB слева). */
-    public String stateAsBitString() {
-        StringBuilder sb = new StringBuilder(DEGREE);
-        for (int i = DEGREE - 1; i >= 0; i--) {
-            sb.append((int) ((state >>> i) & 1L));
-        }
-        return sb.toString();
-    }
-
-    /** Для отчёта: такт → состояние до сдвига → Ki; затем один такт LFSR. */
-    public static String formatTactLine(int tactNumber, Lfsr35 lfsr) {
-        String bits = lfsr.stateAsBitString();
-        int ki = lfsr.nextBit();
-        return String.format("%d\t%s\t%d", tactNumber, bits, ki);
-    }
-
     /**
      * Строка из '0'/'1': слева направо — от старшего разряда к младшему (как на схеме).
      * Берутся первые 35 символов; при нехватке дополняются нулями слева (старшие разряды).
