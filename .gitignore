@@ -12,3 +12,11 @@ out/
 **/.idea/usage.statistics.xml
 **/.idea/dictionaries/
 **/.idea/shelf/
+
+# TI_Lab2: проект только в TI_Lab2/lab_2 — не коммитить копии в корень TI_Lab2
+TI_Lab2/src/
+TI_Lab2/TI_Lab2.iml
+TI_Lab2/compile.sh
+TI_Lab2/run.sh
+TI_Lab2/.idea/
+TI_Lab2/Test Files/
