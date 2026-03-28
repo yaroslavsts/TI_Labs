@@ -1,0 +1,14 @@
+# macOS
+.DS_Store
+
+# Java compiled output
+out/
+**/out/
+*.class
+
+# IntelliJ — локальные/персональные файлы (остальной .idea можно коммитить)
+**/.idea/workspace.xml
+**/.idea/tasks.xml
+**/.idea/usage.statistics.xml
+**/.idea/dictionaries/
+**/.idea/shelf/

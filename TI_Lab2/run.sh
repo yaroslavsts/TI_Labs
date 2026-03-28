@@ -1,3 +1,2 @@
 #!/bin/bash
-cd "$(dirname "$0")"
-java -cp out LfsrStreamCipherApp
+exec "$(dirname "$0")/lab_2/run.sh"

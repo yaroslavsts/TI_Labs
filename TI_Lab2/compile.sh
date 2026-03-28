@@ -1,5 +1,2 @@
 #!/bin/bash
-cd "$(dirname "$0")"
-mkdir -p out
-javac -encoding UTF-8 -d out src/*.java
-echo "Compilation: $?"
+exec "$(dirname "$0")/lab_2/compile.sh"
