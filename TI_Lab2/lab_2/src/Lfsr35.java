@@ -71,6 +71,6 @@ public final class Lfsr35 {
     }
 
     public static String polynomialDescription() {
-        return "P(x) = x^35 + x^2 + 1, примитивный; сдвиг влево, Ki = b₁, обратная связь b₁⊕b₃₄";
+        return "P(x) = x^35 + x^2 + 1";
     }
 }

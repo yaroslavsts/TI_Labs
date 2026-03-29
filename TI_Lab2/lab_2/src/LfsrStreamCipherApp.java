@@ -67,10 +67,6 @@ public class LfsrStreamCipherApp extends JFrame {
         gc.weightx = 0;
         north.add(buildPresetPanel(ui), gc);
 
-        gc.gridy = 2;
-        north.add(new JLabel("<html><body style='width:900px'>" + Lfsr35.polynomialDescription()
-                + "<br>C<sub>i</sub> = M<sub>i</sub> ⊕ K<sub>i</sub>; дешифрование тем же ключом.</body></html>"), gc);
-
         main.add(north, BorderLayout.NORTH);
 
         JPanel center = new JPanel(new GridLayout(3, 1, 0, 8));
@@ -337,7 +333,7 @@ public class LfsrStreamCipherApp extends JFrame {
             sb.append("\n\n");
         }
         sb.append("Последние ").append(edge).append(" байт гаммы K:\n");
-        sb.append(formatByteRangeGrouped(tail, n - edge, edge));
+        sb.append(formatByteRangeGrouped(tail, 0, tail.length, n - edge));
         sb.append("\n\n(всего байт гаммы: ").append(n).append(")");
         if (n <= 2 * edge) {
             sb.append(" — блоки перекрываются");
@@ -346,20 +342,30 @@ public class LfsrStreamCipherApp extends JFrame {
     }
 
     /**
-     * Участок {@code data[from .. from+len-1]}: до {@value BYTES_PER_LINE} байт в строке,
-     * в подписи — глобальные индексы байтов в файле/потоке.
+     * Участок {@code data[from .. from+len-1]}; подписи строк — те же индексы (срез из «целого» массива).
      */
     private static String formatByteRangeGrouped(byte[] data, int from, int len) {
-        if (data == null || len <= 0 || from < 0 || from >= data.length) {
+        return formatByteRangeGrouped(data, from, len, from);
+    }
+
+    /**
+     * Участок {@code data[arrayFrom .. arrayFrom+len-1]}; в подписи — глобальные индексы байтов,
+     * где {@code data[arrayFrom]} соответствует индексу {@code globalIndexOfArrayFrom}.
+     * Нужно для хвоста гаммы: в {@code tail} лежат байты с индексами файла {@code n-edge .. n-1}, но в массиве — с 0.
+     */
+    private static String formatByteRangeGrouped(byte[] data, int arrayFrom, int len, int globalIndexOfArrayFrom) {
+        if (data == null || len <= 0 || arrayFrom < 0 || arrayFrom >= data.length) {
             return "";
         }
-        len = Math.min(len, data.length - from);
-        int end = from + len;
+        len = Math.min(len, data.length - arrayFrom);
+        int end = arrayFrom + len;
         StringBuilder sb = new StringBuilder(len * (8 + 2) + 64);
-        int pos = from;
+        int pos = arrayFrom;
         while (pos < end) {
             int lineEnd = Math.min(pos + BYTES_PER_LINE, end);
-            sb.append(String.format("[%02d–%02d]  ", pos, lineEnd - 1));
+            int g0 = globalIndexOfArrayFrom + (pos - arrayFrom);
+            int g1 = globalIndexOfArrayFrom + (lineEnd - 1 - arrayFrom);
+            sb.append(String.format("[%02d–%02d]  ", g0, g1));
             for (int i = pos; i < lineEnd; i++) {
                 if (i > pos) {
                     sb.append("  ");
